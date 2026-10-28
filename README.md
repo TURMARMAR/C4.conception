@@ -50,4 +50,13 @@
                 <div class="steer-buttons">
                     <button class="btn btn-trim" id="btn-trim-port">-1°</button>
                     <span id="trim-display" class="trim-value">0°</span>
-                    <button class="btn btn-trim" id="btn-
+                    <button class="btn btn-trim" id="btn-trim-stbd">+1°</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Le script est chargé à la fin pour que le HTML s'affiche d'abord -->
+    <script src="script.js"></script>
+</body>
+</html>
