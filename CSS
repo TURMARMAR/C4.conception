@@ -1,1 +1,222 @@
+:root {
+    --bg-color: #0a0e17;
+    --panel-bg: #131b2b;
+    --cyan: #00f0ff;
+    --cyan-dim: rgba(0, 240, 255, 0.2);
+    --red: #ff3366;
+    --text-main: #e0e5ec;
+    --text-muted: #8a9bb4;
+}
 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    min-height: 100vh;
+}
+
+.dashboard {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+    background: var(--panel-bg);
+    border-bottom: 2px solid var(--cyan);
+    border-radius: 8px;
+}
+
+h1 {
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+.team-badge {
+    background-color: var(--cyan);
+    color: var(--bg-color);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+.status {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.status-indicator {
+    color: var(--cyan);
+    font-weight: bold;
+    animation: blink 2s infinite;
+}
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.telemetry {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.panel {
+    background: var(--panel-bg);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--cyan-dim);
+}
+
+h2 {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+}
+
+.value-display {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--cyan);
+    margin-bottom: 15px;
+}
+
+/* Jauge de vitesse */
+.gauge-container {
+    height: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.speed-gauge {
+    height: 100%;
+    width: 50%;
+    background: var(--cyan);
+    position: absolute;
+    left: 50%;
+    transform-origin: left;
+    transition: all 0.2s ease-out;
+}
+
+/* Animation Gouvernail */
+.rudder-container {
+    height: 80px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.boat-hull {
+    width: 40px;
+    height: 60px;
+    border: 2px solid var(--text-muted);
+    border-radius: 50% 50% 10px 10px;
+    position: absolute;
+    top: 0;
+}
+
+.rudder {
+    width: 4px;
+    height: 40px;
+    background: var(--cyan);
+    position: absolute;
+    top: 50px;
+    transform-origin: top center;
+    transition: transform 0.3s ease-out;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+@media (max-width: 600px) {
+    .controls, .telemetry { grid-template-columns: 1fr; }
+}
+
+.control-group {
+    background: var(--panel-bg);
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+h3 {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+.steer-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn {
+    padding: 15px;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    width: 100%;
+}
+.btn:active { transform: scale(0.95); }
+
+.btn-action {
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+}
+.btn-action:hover { background: rgba(0, 240, 255, 0.3); }
+
+.btn-danger {
+    background: rgba(255, 51, 102, 0.2);
+    color: var(--red);
+    border: 1px solid var(--red);
+    padding: 20px;
+    font-size: 1.2rem;
+}
+.btn-danger:hover { background: rgba(255, 51, 102, 0.4); }
+
+.btn-steer {
+    background: #2a3b5c;
+    color: white;
+}
+.btn-steer:hover { background: #3a507d; }
+
+.btn-trim {
+    background: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-muted);
+    padding: 10px;
+    flex: 1;
+}
+.trim-value {
+    font-size: 1.2rem;
+    color: var(--cyan);
+    width: 40px;
+    text-align: center;
+}
