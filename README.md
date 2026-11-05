@@ -2,7 +2,6 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <!-- Empêche le zoom sur mobile, crucial pour une télécommande tactile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Split the G - Commande</title>
     <style>
@@ -11,6 +10,7 @@
             --bg-color: #0b1319;
             --panel-bg: #14222c;
             --danger: #ff4757;
+            --success: #2ecc71;
         }
 
         body {
@@ -23,7 +23,6 @@
             flex-direction: column;
             height: 100vh;
             box-sizing: border-box;
-            /* Empêche le rebond du scroll sur mobile */
             overscroll-behavior-y: none; 
         }
 
@@ -72,7 +71,7 @@
             height: 40px;
             background-color: var(--cyan);
             position: absolute;
-            top: 50%; /* Point de pivot au cul du bateau */
+            top: 50%;
             transform-origin: top center;
             transform: rotate(0deg);
             transition: transform 0.2s ease-out;
@@ -101,7 +100,6 @@
             font-size: 1.1rem;
             font-family: inherit;
             font-weight: bold;
-            /* Permet les clics très rapides sans zoomer l'écran */
             touch-action: manipulation; 
             user-select: none;
             cursor: pointer;
@@ -148,7 +146,8 @@
 <body>
 
     <h1>Split the G - Télécommande</h1>
-<button id="btn-connect" class="btn-stop" style="background: rgba(0, 229, 255, 0.1); border-color: var(--cyan); color: var(--cyan); margin-bottom: 15px;">🔌 CONNECTER LE BATEAU</button>
+    <button id="btn-connect" class="btn-stop" style="background: rgba(0, 229, 255, 0.1); border-color: var(--cyan); color: var(--cyan); margin-bottom: 15px;">🔌 CONNECTER LE BATEAU</button>
+    
     <div class="telemetry">
         <div>
             <div class="data-label">VITESSE</div>
@@ -162,18 +161,15 @@
 
     <div class="radar-view">
         <div class="hull"></div>
-        <!-- Le point d'origine du transform CSS fera pivoter ceci comme un vrai safran -->
         <div class="rudder" id="ui-safran"></div>
     </div>
 
     <div class="controls">
-        <!-- Colonne Gauche : Moteur (Pouce gauche) -->
         <div class="control-col">
             <button onclick="moteur(1)">AVANT</button>
             <button onclick="moteur(-1)">ARRIÈRE</button>
         </div>
         
-        <!-- Colonne Droite : Direction (Pouce droit) -->
         <div class="control-col">
             <button onclick="barre(-1)">BÂBORD</button>
             <button onclick="barre(1)">TRIBORD</button>
@@ -187,46 +183,39 @@
             <button onclick="ajusterTrim(1)">TRIM +</button>
         </div>
     </div>
-<script>
-        // --- CONFIGURATION DU BATEAU ---
+
+    <script>
         const ANGLE_MAX = 45;
         const ANGLE_MIN = -45;
         const INC_BARRE = 5;
         const INC_MOTEUR = 30;
         const VITESSE_MAX = 255;
 
-        // Variables d'état
         let angleBarre = 0;
         let vitesse = 0;
         let trim = 0;
 
-        // --- API WEB BLUETOOTH ---
-        // UUIDs standard du service Nordic UART utilisé par la micro:bit
         const UART_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
         const UART_RX_CHAR_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
         let txCharacteristic;
 
         document.getElementById('btn-connect').addEventListener('click', async () => {
             try {
-                // Demande à l'utilisateur de sélectionner la micro:bit
                 const device = await navigator.bluetooth.requestDevice({
                     filters: [{ namePrefix: 'BBC micro:bit' }],
                     optionalServices: [UART_SERVICE_UUID]
                 });
 
-                // Connexion au serveur GATT et récupération des services
                 const server = await device.gatt.connect();
                 const service = await server.getPrimaryService(UART_SERVICE_UUID);
                 txCharacteristic = await service.getCharacteristic(UART_RX_CHAR_UUID);
                 
-                // Mise à jour visuelle du bouton
                 const btnConnect = document.getElementById('btn-connect');
                 btnConnect.innerText = "✅ NAVIRE CONNECTÉ";
                 btnConnect.style.color = "var(--success)";
                 btnConnect.style.borderColor = "var(--success)";
                 btnConnect.style.background = "rgba(46, 204, 113, 0.1)";
                 
-                // Envoi de la configuration initiale à la carte
                 transmettreTrames();
 
             } catch (error) {
@@ -235,42 +224,32 @@
             }
         });
 
-        // Fonction d'envoi bas niveau
+        // --- CORRECTION APPLIQUÉE ICI : Utilisation du Dièse (#) ---
         async function envoyerBluetooth(texte) {
-            if (!txCharacteristic) return; // Ignore si on n'est pas connecté
+            if (!txCharacteristic) return;
             const encoder = new TextEncoder();
             try {
-                // L'ajout du "\n" est crucial, c'est ce que la micro:bit utilise pour découper les messages
-                await txCharacteristic.writeValue(encoder.encode(texte + "\n"));
+                // On ajoute un "#" à la fin du message pour que la carte le comprenne
+                await txCharacteristic.writeValue(encoder.encode(texte + "#"));
             } catch (e) {
                 console.log("Erreur de transmission :", e);
             }
         }
 
-        // Fonction d'envoi haut niveau (Met à jour la carte avec l'état de l'interface)
         function transmettreTrames() {
-            // Le trim est calculé sur le téléphone : on envoie l'angle final au bateau
             let angleFinal = angleBarre + trim;
-            
             envoyerBluetooth("B" + angleFinal);
-            
-            // Un micro-délai permet d'éviter que les messages ne se télescopent en Bluetooth
             setTimeout(() => envoyerBluetooth("V" + vitesse), 30); 
         }
 
-        // --- LOGIQUE DE L'INTERFACE ---
-
         function actualiserAffichage() {
-            // Mise à jour des textes
             document.getElementById('ui-vitesse').innerText = vitesse;
             document.getElementById('ui-barre').innerText = angleBarre + '°';
             document.getElementById('ui-trim').innerText = trim;
 
-            // Fait pivoter le gouvernail visuel
             let rotationTotale = (angleBarre + trim) * -1;
             document.getElementById('ui-safran').style.transform = `rotate(${rotationTotale}deg)`;
             
-            // Envoi des nouvelles consignes au bateau
             transmettreTrames();
         }
 
@@ -297,10 +276,9 @@
             vitesse = 0;
             angleBarre = 0;
             actualiserAffichage();
-            envoyerBluetooth("S"); // Force un signal "S" (Stop) immédiat vers la carte
+            envoyerBluetooth("S");
         }
 
-        // Support du clavier pour faciliter les tests depuis un ordinateur
         document.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowUp') moteur(1);
             if (e.key === 'ArrowDown') moteur(-1);
@@ -309,7 +287,6 @@
             if (e.key === ' ') arretUrgence();
         });
 
-        // Initialisation de l'affichage
         actualiserAffichage();
     </script>
 </body>
