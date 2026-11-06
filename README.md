@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,6 +13,7 @@
             --danger: #ff4757;
             --success: #2ecc71;
         }
+        
       body {
             font-family: 'Courier New', Courier, monospace;
             background-color: var(--bg-color);
@@ -24,6 +26,7 @@
             box-sizing: border-box;
             overscroll-behavior-y: none; 
         }
+        
      h1 {
             text-align: center;
             font-size: 1.2rem;
@@ -31,6 +34,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+        
      /* --- Télémétrie --- */
         .telemetry {
             display: flex;
@@ -41,8 +45,10 @@
             border: 1px solid rgba(0, 229, 255, 0.2);
             text-align: center;
         }
+        
      .data-label { font-size: 0.8rem; opacity: 0.8; }
      .data-value { font-size: 1.8rem; font-weight: bold; margin-top: 5px; }
+     
        /* --- Visualisation du bateau --- */
       .radar-view {
             flex-grow: 1;
@@ -52,6 +58,7 @@
             position: relative;
             min-height: 120px;
         }
+        
        .hull {
             width: 30px;
             height: 80px;
@@ -59,6 +66,7 @@
             border-radius: 50% 50% 10px 10px;
             position: absolute;
         }
+        
      .rudder {
             width: 4px;
             height: 40px;
@@ -69,6 +77,7 @@
             transform: rotate(0deg);
             transition: transform 0.2s ease-out;
         }
+        
        /* --- Grille de Contrôle --- */
         .controls {
             display: grid;
@@ -76,11 +85,13 @@
             gap: 15px;
             margin-bottom: 10px;
         }
+        
      .control-col {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
+        
         button {
             background: var(--panel-bg);
             color: var(--cyan);
@@ -95,11 +106,13 @@
             cursor: pointer;
             transition: background 0.1s, transform 0.1s;
         }
+        
        button:active {
             background: var(--cyan);
             color: var(--bg-color);
             transform: scale(0.95);
         }
+        
         .btn-stop {
             grid-column: span 2;
             background: rgba(255, 71, 87, 0.1);
@@ -108,10 +121,12 @@
             padding: 20px;
             font-size: 1.2rem;
         }
+        
      .btn-stop:active {
             background: var(--danger);
             color: white;
         }
+        
        .trim-controls {
             grid-column: span 2;
             display: flex;
@@ -121,12 +136,15 @@
             border-radius: 12px;
             padding: 5px;
         }
+        
         .trim-controls button {
             padding: 15px 20px;
             font-size: 1rem;
             border: none;
         }
+        
     </style>
+    
 </head>
 <body>
 
