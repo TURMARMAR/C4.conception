@@ -280,12 +280,7 @@
             actualiserAffichage();
             envoyerBluetooth("S");
   }
-    // Envoie les commandes toutes les secondes pour nourrir le chien de garde du Micro:bit
-  setInterval(() => {
-        if (txCharacteristic) {
-        transmettreTrames();
-        }
-}, 1000);
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowUp') moteur(1);
             if (e.key === 'ArrowDown') moteur(-1);
