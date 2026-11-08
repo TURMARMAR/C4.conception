@@ -281,6 +281,7 @@
             envoyerBluetooth("S");
   }
 
+      
         document.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowUp') moteur(1);
             if (e.key === 'ArrowDown') moteur(-1);
