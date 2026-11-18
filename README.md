@@ -103,7 +103,8 @@
         // --- ENVOI BLUETOOTH ---
         // Un seul message à la fois, et seule la DERNIÈRE valeur de chaque canal est envoyée :
         // on peut glisser le doigt vite sans saturer la liaison.
-        // Protocole : "D<angle>" direction, "V<-100 à 100>" vitesse, "T<degrés>" trim, "S" arrêt, "P" signal de vie.
+        // Protocole : "D<angle>" direction, "V<-100 à 100>" vitesse, "T<degrés>" trim, "P" signal de vie,
+        // "S" arrêt d'urgence (moteurs coupés et barre au centre).
         const PRIORITE = ['S', 'V', 'T', 'D', 'P'];   // l'arrêt passe toujours en premier
         const aEnvoyer = new Map();                   // canal -> dernier message en attente
         let envoiEnCours = false;
@@ -133,7 +134,7 @@
         }
 
         // --- RÉCEPTION BLUETOOTH ---
-        // Protocole : "U<volts>" tension moteur, "X" moteurs coupés après une perte de liaison.
+        // Protocole : "U<volts>" tension moteur ("U--" si aucune tension), "X" moteurs coupés après une perte de liaison.
         let tampon = "";
 
         function surReception(evenement) {
@@ -146,7 +147,7 @@
         function traiterLigne(ligne) {
             if (ligne[0] === 'U') {
                 const volts = parseFloat(ligne.slice(1));
-                if (!isNaN(volts)) $('aff-tension').textContent = volts.toFixed(1) + " V";
+                $('aff-tension').textContent = isNaN(volts) ? "-- V" : volts.toFixed(1) + " V";
             } else if (ligne === 'X') {
                 arretMoteurs();
                 afficherMessage("Liaison interrompue : moteurs coupés");
@@ -198,9 +199,9 @@
 
         // --- COMMANDES ---
         function arretMoteurs() {
-            curseurVitesse.value = 0;
-            majAffichage();
-            aEnvoyer.delete('V');   // inutile d'envoyer une ancienne vitesse après l'arrêt
+            remiseAZero();          // vitesse à 0 et barre au centre, comme sur la micro:bit
+            aEnvoyer.delete('V');   // inutile d'envoyer d'anciennes valeurs après l'arrêt
+            aEnvoyer.delete('D');
             envoyer('S', 'S');
         }
 
