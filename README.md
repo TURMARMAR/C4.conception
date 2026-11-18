@@ -65,7 +65,7 @@
 
     <script>
         const UART_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-        const UART_RX_CHAR_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+        const UART_RX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
         const ANGLE_CENTRE = 90;  // même valeur que dans le code micro:bit
         const PAUSE_MS = 40;      // délai mini entre deux envois Bluetooth
 
