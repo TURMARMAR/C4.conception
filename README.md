@@ -1,296 +1,181 @@
 <!DOCTYPE html>
 <html lang="fr">
-    
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Split the G - Commande</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Split the G - Télécommande</title>
     <style>
-        :root {
-            --cyan: #00e5ff;
-            --bg-color: #0b1319;
-            --panel-bg: #14222c;
-            --danger: #ff4757;
-            --success: #2ecc71;
+        :root { --fond: #0b1319; --carte: #14222c; --cyan: #00e5ff; --vert: #2ecc71; --rouge: #ff4757; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: monospace; background: var(--fond); color: var(--cyan);
+            margin: 0; padding: 20px; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+            touch-action: manipulation; overscroll-behavior-y: none; user-select: none;
         }
-        
-      body {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: var(--bg-color);
-            color: var(--cyan);
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            box-sizing: border-box;
-            overscroll-behavior-y: none; 
-        }
-        
-     h1 {
-            text-align: center;
-            font-size: 1.2rem;
-            margin-top: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-     /* --- Télémétrie --- */
-        .telemetry {
-            display: flex;
-            justify-content: space-around;
-            background: var(--panel-bg);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 229, 255, 0.2);
-            text-align: center;
-        }
-        
-     .data-label { font-size: 0.8rem; opacity: 0.8; }
-     .data-value { font-size: 1.8rem; font-weight: bold; margin-top: 5px; }
-     
-       /* --- Visualisation du bateau --- */
-      .radar-view {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            min-height: 120px;
-        }
-        
-       .hull {
-            width: 30px;
-            height: 80px;
-            border: 2px solid var(--cyan);
-            border-radius: 50% 50% 10px 10px;
-            position: absolute;
-        }
-        
-     .rudder {
-            width: 4px;
-            height: 40px;
-            background-color: var(--cyan);
-            position: absolute;
-            top: 50%;
-            transform-origin: top center;
-            transform: rotate(0deg);
-            transition: transform 0.2s ease-out;
-        }
-        
-       /* --- Grille de Contrôle --- */
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-        
-     .control-col {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
+        h2 { margin: 0; letter-spacing: 2px; text-transform: uppercase; font-size: 1.3rem; }
+        .bloc { width: 100%; max-width: 420px; }
+        .carte { background: var(--carte); border: 2px solid var(--cyan); border-radius: 12px; padding: 14px 16px; }
+        .entete, .reperes { display: flex; justify-content: space-between; align-items: center; }
+        .entete { letter-spacing: 2px; margin-bottom: 4px; }
+        .entete strong { font-size: 1.3rem; }
+        .reperes { font-size: .75rem; opacity: .8; }
+
         button {
-            background: var(--panel-bg);
-            color: var(--cyan);
-            border: 1px solid var(--cyan);
-            border-radius: 12px;
-            padding: 25px 10px;
-            font-size: 1.1rem;
-            font-family: inherit;
-            font-weight: bold;
-            touch-action: manipulation; 
-            user-select: none;
-            cursor: pointer;
-            transition: background 0.1s, transform 0.1s;
+            background: var(--carte); color: var(--cyan); border: 2px solid var(--cyan); border-radius: 12px;
+            padding: 16px 10px; font: bold 1.05rem monospace; cursor: pointer;
         }
-        
-       button:active {
-            background: var(--cyan);
-            color: var(--bg-color);
-            transform: scale(0.95);
+        button:active:not(:disabled) { background: var(--cyan); color: var(--fond); }
+        button:disabled { opacity: .4; }
+        #btn-connect.ok { color: var(--vert); border-color: var(--vert); background: rgba(46, 204, 113, .1); opacity: 1; }
+        #btn-centre { padding: 8px 14px; font-size: .8rem; }
+        #btn-stop { padding: 24px 10px; color: var(--rouge); border-color: var(--rouge); background: rgba(255, 71, 87, .1); }
+        #btn-stop:active { background: var(--rouge); color: #fff; }
+
+        /* Curseurs : grosse poignée pour le pouce */
+        input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 48px; margin: 0; background: transparent; }
+        input[type=range]:disabled { opacity: .4; }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 14px; border-radius: 7px; background: var(--fond); box-shadow: inset 0 0 0 2px var(--cyan);
         }
-        
-        .btn-stop {
-            grid-column: span 2;
-            background: rgba(255, 71, 87, 0.1);
-            border-color: var(--danger);
-            color: var(--danger);
-            padding: 20px;
-            font-size: 1.2rem;
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 44px; height: 44px; margin-top: -15px;
+            border-radius: 50%; background: var(--cyan); border: 4px solid var(--fond);
         }
-        
-     .btn-stop:active {
-            background: var(--danger);
-            color: white;
-        }
-        
-       .trim-controls {
-            grid-column: span 2;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--panel-bg);
-            border-radius: 12px;
-            padding: 5px;
-        }
-        
-        .trim-controls button {
-            padding: 15px 20px;
-            font-size: 1rem;
-            border: none;
-        }
-        
     </style>
-    
 </head>
 <body>
 
-  <h1>Split the G - Télécommande</h1>
-    <button id="btn-connect" class="btn-stop" style="background: rgba(0, 229, 255, 0.1); border-color: var(--cyan); color: var(--cyan); margin-bottom: 15px;">🔌 CONNECTER LE BATEAU</button>
-    
-  <div class="telemetry">
-        <div>
-            <div class="data-label">VITESSE</div>
-            <div class="data-value" id="ui-vitesse">0</div>
-        </div>
-        <div>
-            <div class="data-label">BARRE</div>
-            <div class="data-value" id="ui-barre">0°</div>
-        </div>
-    </div>
-    <div class="radar-view">
-        <div class="hull"></div>
-        <div class="rudder" id="ui-safran"></div>
-    </div>
-    <div class="controls">
-        <div class="control-col">
-            <button onclick="moteur(1)">AVANT</button>
-            <button onclick="moteur(-1)">ARRIÈRE</button>
-        </div>
-             <div class="control-col">
-            <button onclick="barre(-1)">BÂBORD</button>
-            <button onclick="barre(1)">TRIBORD</button>
-        </div>
-     <button class="btn-stop" onclick="arretUrgence()">ARRÊT D'URGENCE</button>
-    <div class="trim-controls">
-            <button onclick="ajusterTrim(-1)">TRIM -</button>
-            <div>TRIM: <span id="ui-trim">0</span></div>
-            <button onclick="ajusterTrim(1)">TRIM +</button>
-        </div>
+    <h2>Split the G</h2>
+    <button id="btn-connect" class="bloc">🔌 CONNECTER</button>
+
+    <div class="bloc carte">
+        <div class="entete"><span>DIRECTION</span><strong id="aff-direction">Centre</strong></div>
+        <input type="range" id="curseur-direction" min="45" max="135" step="5" value="90" disabled>
+        <div class="reperes"><span>◄ BÂBORD</span><button id="btn-centre" disabled>CENTRER</button><span>TRIBORD ►</span></div>
     </div>
 
-  <script>
-        const ANGLE_MAX = 45;
-        const ANGLE_MIN = -45;
-        const INC_BARRE = 5;
-        const INC_MOTEUR = 30;
-        const VITESSE_MAX = 255;
+    <div class="bloc carte">
+        <div class="entete"><span>VITESSE</span><strong id="aff-vitesse">0 %</strong></div>
+        <input type="range" id="curseur-vitesse" min="0" max="100" step="5" value="0" disabled>
+        <div class="reperes"><span>0</span><span>100 %</span></div>
+    </div>
 
-        let angleBarre = 0;
-        let vitesse = 0;
-        let trim = 0;
+    <button id="btn-stop" class="bloc">ARRÊT D'URGENCE</button>
 
+    <script>
         const UART_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-        const UART_RX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-        let txCharacteristic;
+        const UART_RX_CHAR_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+        const ANGLE_CENTRE = 90;  // même valeur que dans le code micro:bit
+        const PAUSE_MS = 40;      // délai mini entre deux envois Bluetooth
 
-        document.getElementById('btn-connect').addEventListener('click', async () => {
+        const $ = id => document.getElementById(id);
+        const btnConnect = $('btn-connect'), btnCentre = $('btn-centre'), btnStop = $('btn-stop');
+        const curseurDirection = $('curseur-direction'), curseurVitesse = $('curseur-vitesse');
+        let txCharacteristic = null;
+
+        // --- ENVOI BLUETOOTH ---
+        // Un seul message à la fois, et seule la DERNIÈRE valeur de chaque curseur est envoyée :
+        // on peut glisser le doigt vite sans saturer la liaison.
+        // Protocole : "D<angle>" direction, "V<pourcentage>" vitesse, "S" arrêt.
+        const aEnvoyer = new Map();   // canal ('S', 'V', 'D') -> dernier message en attente
+        let envoiEnCours = false;
+
+        function envoyer(canal, message) {
+            aEnvoyer.set(canal, message);
+            viderFile();
+        }
+
+        async function viderFile() {
+            if (envoiEnCours || !txCharacteristic) return;
+            envoiEnCours = true;
             try {
-                const device = await navigator.bluetooth.requestDevice({
+                while (aEnvoyer.size > 0 && txCharacteristic) {
+                    const canal = ['S', 'V', 'D'].find(c => aEnvoyer.has(c));  // l'arrêt passe toujours en premier
+                    const message = aEnvoyer.get(canal);
+                    aEnvoyer.delete(canal);
+                    await txCharacteristic.writeValue(new TextEncoder().encode(message + "\n"));
+                    await new Promise(r => setTimeout(r, PAUSE_MS));
+                }
+            } catch (e) {
+                console.log("Erreur d'envoi :", e);
+            } finally {
+                envoiEnCours = false;
+            }
+        }
+
+        // --- AFFICHAGE ---
+        function majAffichage() {
+            const ecart = Number(curseurDirection.value) - ANGLE_CENTRE;
+            $('aff-direction').textContent = ecart === 0 ? "Centre" : (ecart < 0 ? "Bâbord " : "Tribord ") + Math.abs(ecart) + "°";
+            $('aff-vitesse').textContent = curseurVitesse.value + " %";
+        }
+
+        function etatConnexion(connecte) {
+            btnConnect.disabled = connecte;
+            btnConnect.classList.toggle('ok', connecte);
+            btnConnect.textContent = connecte ? "✅ CONNECTÉ" : "🔌 CONNECTER";
+            curseurDirection.disabled = curseurVitesse.disabled = btnCentre.disabled = !connecte;
+        }
+
+        function remiseAZero() {
+            curseurDirection.value = ANGLE_CENTRE;
+            curseurVitesse.value = 0;
+            majAffichage();
+        }
+
+        // --- COMMANDES ---
+        curseurDirection.addEventListener('input', () => {
+            majAffichage();
+            envoyer('D', 'D' + curseurDirection.value);
+        });
+
+        curseurVitesse.addEventListener('input', () => {
+            majAffichage();
+            envoyer('V', 'V' + curseurVitesse.value);
+        });
+
+        btnCentre.addEventListener('click', () => {
+            curseurDirection.value = ANGLE_CENTRE;
+            majAffichage();
+            envoyer('D', 'D' + ANGLE_CENTRE);
+        });
+
+        // pointerdown : réagit dès le contact du doigt, sans attendre le relâchement
+        btnStop.addEventListener('pointerdown', () => {
+            curseurVitesse.value = 0;
+            majAffichage();
+            aEnvoyer.delete('V');   // inutile d'envoyer une ancienne vitesse après l'arrêt
+            envoyer('S', 'S');
+        });
+
+        // --- CONNEXION ---
+        btnConnect.addEventListener('click', async () => {
+            try {
+                const appareil = await navigator.bluetooth.requestDevice({
                     filters: [{ namePrefix: 'BBC micro:bit' }],
                     optionalServices: [UART_SERVICE_UUID]
                 });
-
-                const server = await device.gatt.connect();
+                appareil.addEventListener('gattserverdisconnected', () => {
+                    txCharacteristic = null;
+                    aEnvoyer.clear();
+                    remiseAZero();
+                    etatConnexion(false);
+                });
+                const server = await appareil.gatt.connect();
                 const service = await server.getPrimaryService(UART_SERVICE_UUID);
                 txCharacteristic = await service.getCharacteristic(UART_RX_CHAR_UUID);
-                
-                const btnConnect = document.getElementById('btn-connect');
-                btnConnect.innerText = "✅ NAVIRE CONNECTÉ";
-                btnConnect.style.color = "var(--success)";
-                btnConnect.style.borderColor = "var(--success)";
-                btnConnect.style.background = "rgba(46, 204, 113, 0.1)";
-                
-                transmettreTrames();
 
+                remiseAZero();
+                etatConnexion(true);
+                envoyer('V', 'V0');                       // micro:bit et curseurs repartent d'accord
+                envoyer('D', 'D' + ANGLE_CENTRE);
             } catch (error) {
-                console.error("Erreur Bluetooth :", error);
-                alert("Impossible de se connecter : " + error);
+                if (error.name !== 'NotFoundError') alert("Erreur de connexion : " + error);  // NotFoundError = choix annulé
             }
         });
 
-        // --- CORRECTION APPLIQUÉE ICI : Utilisation du Dièse (#) ---
-        async function envoyerBluetooth(texte) {
-            if (!txCharacteristic) return;
-            const encoder = new TextEncoder();
-            try {
-                // On ajoute un "#" à la fin du message pour que la carte le comprenne
-                await txCharacteristic.writeValue(encoder.encode(texte + "#"));
-            } catch (e) {
-                console.log("Erreur de transmission :", e);
-            }
-        }
-
-        async function transmettreTrames() {
-    let angleFinal = angleBarre + trim;
-    // On attend que l'angle soit bien envoyé
-    await envoyerBluetooth("B" + angleFinal);
-    // Optionnel mais recommandé : petite pause de respiration pour le Micro:bit
-    await new Promise(resolve => setTimeout(resolve, 20)); 
-    // On envoie la vitesse
-    await envoyerBluetooth("V" + vitesse);
-}
-        
-        function actualiserAffichage() {
-            document.getElementById('ui-vitesse').innerText = vitesse;
-            document.getElementById('ui-barre').innerText = angleBarre + '°';
-            document.getElementById('ui-trim').innerText = trim;
-
-            let rotationTotale = (angleBarre + trim) * -1;
-            document.getElementById('ui-safran').style.transform = `rotate(${rotationTotale}deg)`;
-            
-            transmettreTrames();
-        }
-        
-   function barre(direction) {
-            angleBarre += (direction * INC_BARRE);
-            if (angleBarre > ANGLE_MAX) angleBarre = ANGLE_MAX;
-            if (angleBarre < ANGLE_MIN) angleBarre = ANGLE_MIN;
-            actualiserAffichage();
-  }
-
-   function moteur(direction) {
-            vitesse += (direction * INC_MOTEUR);
-            if (vitesse > VITESSE_MAX) vitesse = VITESSE_MAX;
-            if (vitesse < -VITESSE_MAX) vitesse = -VITESSE_MAX;
-            actualiserAffichage();
-   }
-
-   function ajusterTrim(direction) {
-            trim += direction;
-            actualiserAffichage();
-   }
-
-   function arretUrgence() {
-            vitesse = 0;
-            angleBarre = 0;
-            actualiserAffichage();
-            envoyerBluetooth("S");
-  }
-
-      
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowUp') moteur(1);
-            if (e.key === 'ArrowDown') moteur(-1);
-            if (e.key === 'ArrowLeft') barre(-1);
-            if (e.key === 'ArrowRight') barre(1);
-            if (e.key === ' ') arretUrgence();
-        });
-
-        actualiserAffichage();
+        majAffichage();
     </script>
 </body>
 </html>
